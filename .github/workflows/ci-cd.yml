@@ -1,0 +1,68 @@
+name: Build and Deploy Weather App
+
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow on pushes to the main branch
+
+jobs:
+  build-and-deploy:
+    name: Build Docker Image and Deploy
+    runs-on: ubuntu-latest
+    env:
+      CI: false
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Java and Maven
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      # Step 3: Build the Spring Boot app
+      - name: Build Spring Boot Application
+        run: |
+          mvn clean package
+
+      # Step 4: Build Docker Image
+      - name: Build Docker Image
+        run: |
+          docker build -t weather-app:latest .
+
+      # Step 5: Save Docker Image as a tar file
+      - name: Save Docker Image
+        run: |
+          docker save -o weather-app.tar weather-app:latest
+
+      # Step 6: Copy Docker Image to Remote Host
+      - name: Copy Docker Image to Remote Host
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          source: "weather-app.tar"
+          target: "/home/${{ secrets.SSH_USER }}"
+
+      # Step 7: Load Docker Image and Deploy on Remote Host
+      - name: Deploy on Remote Host
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            # Load the Docker image
+            docker load -i /home/${{ secrets.SSH_USER }}/weather-app.tar
+
+            # Stop and remove the existing container
+            docker stop weather-app || true
+            docker rm weather-app || true
+
+            # Run the new container
+            docker run -d --name weather-app -p 8081:8081 -v /home/${{ secrets.SSH_USER }}/.env:/app/.env weather-app:latest
