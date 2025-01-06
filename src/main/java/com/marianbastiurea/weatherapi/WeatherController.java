@@ -16,17 +16,21 @@ public class WeatherController {
         this.weatherService = weatherService;
     }
 
-    @GetMapping
-    public List<Weather> getWeatherForDateRange(
-            @RequestParam String startDate,
-            @RequestParam String endDate) {
-        return weatherService.getWeatherByDateRange(
-                LocalDate.parse(startDate), LocalDate.parse(endDate));
+    @GetMapping("/{date}")
+    public Weather getWeatherForDate(@PathVariable("date") String date) {
+        LocalDate localDate = LocalDate.parse(date);
+        System.out.println("Fetching weather data for date: " + date);
+        Weather weather = weatherService.getWeatherByDate(localDate);
+        System.out.println("Weather data fetched: " + weather);
+        return weather;
     }
 
-    @GetMapping("/{date}")
-    public Weather getWeatherForDate(@PathVariable String date) {
-        LocalDate localDate = LocalDate.parse(date);
-        return weatherService.getWeatherByDate(localDate);
+    @GetMapping
+    public List<Weather> getWeatherByDateRange(
+            @RequestParam("startDate") LocalDate startDate,
+            @RequestParam("endDate") LocalDate endDate) {
+        return weatherService.getWeatherByDateRange(startDate, endDate);
     }
+
+
 }

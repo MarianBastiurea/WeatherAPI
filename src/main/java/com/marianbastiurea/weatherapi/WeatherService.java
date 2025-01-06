@@ -70,6 +70,7 @@ public class WeatherService {
 
 
     public List<Weather> getWeatherByDateRange(LocalDate startDate, LocalDate endDate) {
+        System.out.println("Received startDate in WeatherAPIService: " + startDate + ", endDate: " + endDate);
         return weatherList.stream()
                 .filter(weather -> {
                     LocalDate weatherDate = LocalDate.parse(weather.getDate());
@@ -85,4 +86,14 @@ public class WeatherService {
                 .findFirst()
                 .orElse(null);
     }
+
+    public List<Weather> getWeatherForInterval(LocalDate start, LocalDate end) {
+        return weatherList.stream()
+                .filter(weather -> {
+                    LocalDate weatherDate = LocalDate.parse(weather.getDate());
+                    return !weatherDate.isBefore(start) && !weatherDate.isAfter(end);
+                })
+                .collect(Collectors.toList());
+    }
+
 }
