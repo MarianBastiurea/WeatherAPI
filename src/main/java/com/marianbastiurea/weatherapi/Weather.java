@@ -1,4 +1,5 @@
 package com.marianbastiurea.weatherapi;
+
 import lombok.Data;
 
 @Data

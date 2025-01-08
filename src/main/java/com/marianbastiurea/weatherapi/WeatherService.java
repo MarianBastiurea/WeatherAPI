@@ -3,11 +3,14 @@ package com.marianbastiurea.weatherapi;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +19,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class WeatherService {
-    private List<Weather> weatherList = new ArrayList<>();
     private static final Logger logger = LoggerFactory.getLogger(WeatherService.class);
+    private List<Weather> weatherList = new ArrayList<>();
 
     public WeatherService() {
         try {
