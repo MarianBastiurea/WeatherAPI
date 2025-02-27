@@ -32,5 +32,4 @@ public class WeatherController {
         return weatherService.getWeatherByDateRange(startDate, endDate);
     }
 
-
 }

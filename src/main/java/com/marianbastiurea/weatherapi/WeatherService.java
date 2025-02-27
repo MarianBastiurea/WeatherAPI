@@ -39,27 +39,26 @@ public class WeatherService {
                 throw new FileNotFoundException("File " + filePath + " not found in resources");
             }
 
-            // Creează parserul CSV
+
             CSVParser parser = CSVFormat.DEFAULT
                     .withHeader("date", "temperature", "tmin", "tmax", "precipitation", "snow",
                             "wdir", "windSpeed", "wpgt", "pres", "tsun")
                     .withFirstRecordAsHeader()
                     .parse(reader);
 
-            // Verifică header-ele disponibile (opțional)
+
             Map<String, Integer> headers = parser.getHeaderMap();
             System.out.println("Headers found: " + headers.keySet());
 
-            // Parcurge rândurile
             for (CSVRecord record : parser) {
                 Weather weather = new Weather();
-                weather.setDate(record.get("date")); // Asigură-te că numele headerului este corect
+                weather.setDate(record.get("date"));
                 weather.setTemperature(Double.parseDouble(record.get("temperature")));
                 String precipitationValue = record.get("precipitation");
                 if (precipitationValue != null && !precipitationValue.trim().isEmpty()) {
                     weather.setPrecipitation(Double.parseDouble(precipitationValue));
                 } else {
-                    weather.setPrecipitation(0.0); // sau o valoare implicită dacă este cazul
+                    weather.setPrecipitation(0.0);
                 }
 
                 weather.setWindSpeed(Double.parseDouble(record.get("windSpeed")));
@@ -89,14 +88,4 @@ public class WeatherService {
                 .findFirst()
                 .orElse(null);
     }
-
-    public List<Weather> getWeatherForInterval(LocalDate start, LocalDate end) {
-        return weatherList.stream()
-                .filter(weather -> {
-                    LocalDate weatherDate = LocalDate.parse(weather.getDate());
-                    return !weatherDate.isBefore(start) && !weatherDate.isAfter(end);
-                })
-                .collect(Collectors.toList());
-    }
-
 }
