@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.time.LocalDate;
+import java.time.MonthDay;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -70,22 +71,31 @@ public class WeatherService {
         return weatherList;
     }
 
-
     public List<Weather> getWeatherByDateRange(LocalDate startDate, LocalDate endDate) {
         System.out.println("Received startDate in WeatherAPIService: " + startDate + ", endDate: " + endDate);
         return weatherList.stream()
                 .filter(weather -> {
                     LocalDate weatherDate = LocalDate.parse(weather.getDate());
-                    return (weatherDate.isEqual(startDate) || weatherDate.isAfter(startDate)) &&
-                            (weatherDate.isEqual(endDate) || weatherDate.isBefore(endDate));
+                    MonthDay weatherMonthDay = MonthDay.from(weatherDate);
+                    MonthDay startMonthDay = MonthDay.from(startDate);
+                    MonthDay endMonthDay = MonthDay.from(endDate);
+
+                    return (weatherMonthDay.equals(startMonthDay) || weatherMonthDay.isAfter(startMonthDay)) &&
+                            (weatherMonthDay.equals(endMonthDay) || weatherMonthDay.isBefore(endMonthDay));
                 })
                 .collect(Collectors.toList());
     }
 
     public Weather getWeatherByDate(LocalDate date) {
+        MonthDay searchMonthDay = MonthDay.from(date);
         return weatherList.stream()
-                .filter(weather -> LocalDate.parse(weather.getDate()).isEqual(date))
+                .filter(weather -> {
+                    LocalDate weatherDate = LocalDate.parse(weather.getDate());
+                    MonthDay weatherMonthDay = MonthDay.from(weatherDate);
+                    return weatherMonthDay.equals(searchMonthDay);
+                })
                 .findFirst()
                 .orElse(null);
     }
+
 }
